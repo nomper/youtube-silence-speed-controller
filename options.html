@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Silence Speed Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">YouTube Silence Speed</p>
+        <h1>Playback settings</h1>
+        <p class="intro">
+          Configure the normal playback speed, the accelerated speed for quiet sections,
+          and how quickly the detector reacts.
+        </p>
+      </section>
+
+      <form id="settings-form" class="card">
+        <section class="monitor" aria-labelledby="live-monitor-title">
+          <div class="monitor-header">
+            <div>
+              <p class="monitor-eyebrow">Live Monitor</p>
+              <h2 id="live-monitor-title">Current YouTube audio</h2>
+            </div>
+            <p id="monitor-reason" class="monitor-reason">Open a YouTube watch page to begin.</p>
+          </div>
+
+          <div class="meter-grid">
+            <article class="meter-card">
+              <div class="meter-label-row">
+                <span class="field-label">Current level</span>
+                <span id="current-rms-value" class="meter-value">0.0000</span>
+              </div>
+              <div class="meter-track"><div id="current-rms-bar" class="meter-fill meter-fill-current"></div></div>
+            </article>
+            <article class="meter-card">
+              <div class="meter-label-row">
+                <span class="field-label">Baseline</span>
+                <span id="baseline-value" class="meter-value">0.0000</span>
+              </div>
+              <div class="meter-track"><div id="baseline-bar" class="meter-fill meter-fill-baseline"></div></div>
+            </article>
+            <article class="meter-card">
+              <div class="meter-label-row">
+                <span class="field-label">Threshold</span>
+                <span id="threshold-value" class="meter-value">0.0000</span>
+              </div>
+              <div class="meter-track"><div id="threshold-bar" class="meter-fill meter-fill-threshold"></div></div>
+            </article>
+            <article class="meter-card">
+              <div class="meter-label-row">
+                <span class="field-label">Silence hold</span>
+                <span id="hold-progress-value" class="meter-value">0%</span>
+              </div>
+              <div class="meter-track"><div id="hold-progress-bar" class="meter-fill meter-fill-hold"></div></div>
+            </article>
+          </div>
+
+          <div class="monitor-stats">
+            <p class="stat"><span class="stat-name">Mode</span><span id="monitor-mode" class="stat-value">Inactive</span></p>
+            <p class="stat"><span class="stat-name">Playback</span><span id="monitor-rate" class="stat-value">1.00x</span></p>
+            <p class="stat"><span class="stat-name">Silent now</span><span id="monitor-silent" class="stat-value">No</span></p>
+          </div>
+        </section>
+
+        <label class="field">
+          <span class="field-label">Normal speed</span>
+          <input id="normal-speed" name="normal-speed" type="number" min="0.25" max="4" step="0.05" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Silent-section speed</span>
+          <input id="silent-speed" name="silent-speed" type="number" min="0.25" max="4" step="0.05" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Silence hold time (seconds)</span>
+          <input
+            id="silence-hold-seconds"
+            name="silence-hold-seconds"
+            type="number"
+            min="0.1"
+            max="10"
+            step="0.1"
+          />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Silence sensitivity</span>
+          <input id="silence-sensitivity" name="silence-sensitivity" type="range" min="0" max="100" step="1" />
+          <span id="sensitivity-note" class="field-note"></span>
+        </label>
+
+        <div class="actions">
+          <button type="submit">Save settings</button>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </main>
+    <script src="shared.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

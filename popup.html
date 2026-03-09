@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Silence Speed</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <p class="eyebrow">YouTube Silence Speed</p>
+      <section class="panel toggle-panel">
+        <label class="toggle-row" for="extension-enabled">
+          <span class="toggle-copy">
+            <span class="toggle-label">Enable</span>
+          </span>
+          <span class="toggle-control">
+            <input id="extension-enabled" class="toggle-input" type="checkbox" />
+            <span class="toggle-switch" aria-hidden="true">
+              <span class="toggle-thumb"></span>
+            </span>
+          </span>
+        </label>
+        <label class="toggle-row" for="status-visible">
+          <span class="toggle-copy">
+            <span class="toggle-label">Status Display</span>
+          </span>
+          <span class="toggle-control">
+            <input id="status-visible" class="toggle-input" type="checkbox" />
+            <span class="toggle-switch" aria-hidden="true">
+              <span class="toggle-thumb"></span>
+            </span>
+          </span>
+        </label>
+      </section>
+      <section id="status-sections">
+        <h1>Status</h1>
+        <section class="panel">
+          <p class="label">Controller</p>
+          <p id="state-title" class="value">Loading...</p>
+          <p id="state-description" class="subtle">Checking this page.</p>
+        </section>
+        <section class="metrics">
+          <article class="metric-card">
+            <p class="metric-label">Playback</p>
+            <p id="current-rate" class="metric-value">-</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Mode</p>
+            <p id="current-mode" class="metric-value">-</p>
+          </article>
+        </section>
+        <section class="panel monitor-panel">
+          <div class="monitor-row">
+            <p class="label">Current level</p>
+            <p id="current-rms" class="monitor-value">0.0000</p>
+          </div>
+          <div class="meter-track">
+            <div id="current-rms-bar" class="meter-fill meter-fill-current"></div>
+          </div>
+          <div class="monitor-row secondary">
+            <p class="label">Threshold</p>
+            <p id="threshold-rms" class="monitor-value">0.0000</p>
+          </div>
+          <div class="meter-track">
+            <div id="threshold-rms-bar" class="meter-fill meter-fill-threshold"></div>
+          </div>
+        </section>
+      </section>
+      <button id="open-options" type="button">Open settings</button>
+    </main>
+    <script src="shared.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

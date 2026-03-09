@@ -1,0 +1,258 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", sans-serif;
+  color: #1b1c24;
+  background: #f7f4ee;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(236, 171, 93, 0.35), transparent 28%),
+    linear-gradient(180deg, #f9f7f1 0%, #eee5d7 100%);
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.hero {
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8f5b12;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.intro {
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.6;
+  color: #4b4e5d;
+}
+
+.card {
+  padding: 24px;
+  border: 1px solid rgba(113, 86, 37, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 40px rgba(94, 72, 30, 0.1);
+}
+
+.monitor {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid rgba(113, 86, 37, 0.14);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.9), rgba(248, 241, 229, 0.8));
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.monitor-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a6a1f;
+}
+
+.monitor-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.monitor-reason {
+  margin: 0;
+  max-width: 280px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #625840;
+}
+
+.meter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.meter-card {
+  padding: 14px;
+  border: 1px solid rgba(113, 86, 37, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.meter-label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.meter-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.meter-track {
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(128, 108, 71, 0.14);
+}
+
+.meter-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 120ms linear;
+}
+
+.meter-fill-current {
+  background: linear-gradient(90deg, #267f99, #52b6c9);
+}
+
+.meter-fill-baseline {
+  background: linear-gradient(90deg, #8b6e3d, #d4a65d);
+}
+
+.meter-fill-threshold {
+  background: linear-gradient(90deg, #905340, #d07b60);
+}
+
+.meter-fill-hold {
+  background: linear-gradient(90deg, #527128, #92b346);
+}
+
+.monitor-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.stat-name {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #6d624c;
+}
+
+.stat-value {
+  font-weight: 700;
+}
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.field-note {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666c52;
+}
+
+input[type="number"],
+input[type="range"] {
+  width: 100%;
+}
+
+input[type="number"] {
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d7c8ac;
+  border-radius: 12px;
+  font: inherit;
+  background: #fffdf9;
+}
+
+input[type="range"] {
+  accent-color: #c36f1a;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #9b5411, #c8791d);
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  min-height: 20px;
+  color: #4e442e;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px 40px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .monitor-header,
+  .meter-grid,
+  .monitor-stats {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .monitor-header {
+    display: block;
+  }
+}
