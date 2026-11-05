@@ -20,21 +20,18 @@ Manifest V3 extension for Google Chrome and Microsoft Edge.
 - `Enable` toggle in the popup to turn the controller on or off
 - `Status Display` toggle in the popup to hide or show the live status panels
 
-## Load the extension
+## Install for local testing
 
-### Chrome
+No Chrome Web Store or Microsoft Edge Add-ons listing is linked here. To test the extension locally, use an unpacked copy of the extension files:
 
-1. Open `chrome://extensions`
-2. Enable Developer mode
-3. Click Load unpacked
-4. Select this folder
+1. Obtain the source files or a source ZIP and extract the ZIP if needed.
+2. Use a clean folder containing `manifest.json` at its root and the extension's JavaScript, HTML, CSS, and `icons` files. Do not include a signing key, the `release` directory, or other private files in this folder.
+3. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
+4. Enable Developer mode, choose **Load unpacked**, and select the clean folder.
 
-### Edge
+If using this workspace's locally generated package, the prepared folder is `release\unpacked\youtube-silence-speed-controller-v0.1.12\`. Do not select the repository root when it contains a signing key under `release\artifacts\`. The unpacked folder and local release artifacts are not included in the repository.
 
-1. Open `edge://extensions`
-2. Enable Developer mode
-3. Click Load unpacked
-4. Select this folder
+For store submission, use the source ZIP rather than the signed CRX. Keep the PEM signing key private and never upload or share it.
 
 ## Notes
 

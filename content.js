@@ -29,7 +29,9 @@ const sourceNodes = new WeakMap();
 const FALLBACK_STATUS = { ...EMPTY_STATUS };
 
 let settings = { ...SETTINGS_DEFAULTS };
-let currentUrl = location.href;
+let currentUrl = null;
+let currentWatchId = null;
+let playbackGeneration = 0;
 let monitoredVideo = null;
 let audioContext = null;
 let mediaSource = null;
@@ -50,6 +52,18 @@ let controllerStopped = false;
 
 function isWatchPage(url = location.href) {
   return isWatchUrl(url);
+}
+
+function getWatchId(url) {
+  return isWatchPage(url) ? new URL(url).searchParams.get("v") ?? "" : null;
+}
+
+function isCurrentPlayback(video, generation) {
+  return !controllerStopped &&
+    monitoredVideo === video &&
+    playbackGeneration === generation &&
+    currentWatchId !== null &&
+    (location.href === currentUrl || getWatchId(location.href) === currentWatchId);
 }
 
 function isAdShowing() {
@@ -176,6 +190,8 @@ function disconnectAudioGraph() {
 
   if (mediaSource) {
     mediaSource.disconnect();
+    // The element's audio is already routed through Web Audio, even in the mini-player.
+    mediaSource.connect(audioContext.destination);
     mediaSource = null;
   }
 }
@@ -204,11 +220,17 @@ function stopController({ resetRate = false } = {}) {
 
   controllerStopped = true;
 
+  window.navigation?.removeEventListener("currententrychange", updateLocation);
   if (urlTimer) {
     clearInterval(urlTimer);
     urlTimer = null;
   }
 
+  stopWatchingVideo();
+  detachVideo({ resetRate });
+}
+
+function stopWatchingVideo() {
   if (ensureVideoTimer) {
     clearInterval(ensureVideoTimer);
     ensureVideoTimer = null;
@@ -220,7 +242,6 @@ function stopController({ resetRate = false } = {}) {
   }
 
   removeInteractionListeners();
-  detachVideo({ resetRate });
 }
 
 function resetPlaybackRate() {
@@ -235,6 +256,7 @@ function resetPlaybackRate() {
 }
 
 function detachVideo({ resetRate = true } = {}) {
+  playbackGeneration += 1;
   stopSampling();
 
   if (monitoredVideo) {
@@ -249,6 +271,7 @@ function detachVideo({ resetRate = true } = {}) {
     monitoredVideo.removeEventListener("seeking", onPlaybackEvent);
     monitoredVideo.removeEventListener("seeked", onPlaybackEvent);
     monitoredVideo.removeEventListener("ratechange", onPlaybackEvent);
+    monitoredVideo.removeEventListener("loadedmetadata", onMediaChanged);
   }
 
   disconnectAudioGraph();
@@ -292,12 +315,8 @@ function installInteractionListeners() {
   document.addEventListener("keydown", resumeAudioContextFromInteraction, true);
 }
 
-async function ensureAudioGraph(video) {
-  if (controllerStopped) {
-    return false;
-  }
-
-  if (!video) {
+async function ensureAudioGraph(video, generation) {
+  if (!isCurrentPlayback(video, generation)) {
     return false;
   }
 
@@ -313,21 +332,30 @@ async function ensureAudioGraph(video) {
     }
   }
 
-  if (mediaSource && monitoredVideo === video && analyser && gainNode) {
+  if (!isCurrentPlayback(video, generation) || !settings.extensionEnabled || getCurrentReason(video) !== "active") {
+    return false;
+  }
+
+  if (mediaSource && analyser && gainNode) {
     return true;
   }
 
   disconnectAudioGraph();
 
   try {
-    mediaSource = sourceNodes.get(video) ?? audioContext.createMediaElementSource(video);
-    sourceNodes.set(video, mediaSource);
+    mediaSource = sourceNodes.get(video);
+    if (!mediaSource) {
+      mediaSource = audioContext.createMediaElementSource(video);
+      mediaSource.connect(audioContext.destination);
+      sourceNodes.set(video, mediaSource);
+    }
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.2;
     gainNode = audioContext.createGain();
     gainNode.gain.value = 1;
 
+    mediaSource.disconnect(audioContext.destination);
     mediaSource.connect(analyser);
     analyser.connect(gainNode);
     gainNode.connect(audioContext.destination);
@@ -582,7 +610,13 @@ function onPlaybackEvent() {
     return;
   }
 
-  ensureAudioGraph(monitoredVideo).then((ready) => {
+  const video = monitoredVideo;
+  const generation = playbackGeneration;
+  ensureAudioGraph(video, generation).then((ready) => {
+    if (!isCurrentPlayback(video, generation) || !settings.extensionEnabled || getCurrentReason(video) !== "active") {
+      return;
+    }
+
     if (!ready) {
       updateInactiveState("paused");
       return;
@@ -590,6 +624,14 @@ function onPlaybackEvent() {
 
     startSampling();
   });
+}
+
+function onMediaChanged() {
+  playbackGeneration += 1;
+  stopSampling();
+  clearSilenceTracking();
+  resetPlaybackRate();
+  onPlaybackEvent();
 }
 
 function attachVideo(video) {
@@ -611,6 +653,7 @@ function attachVideo(video) {
   monitoredVideo.addEventListener("seeking", onPlaybackEvent);
   monitoredVideo.addEventListener("seeked", onPlaybackEvent);
   monitoredVideo.addEventListener("ratechange", onPlaybackEvent);
+  monitoredVideo.addEventListener("loadedmetadata", onMediaChanged);
 
   setStatus({
     isEligible: true,
@@ -623,39 +666,24 @@ function attachVideo(video) {
   onPlaybackEvent();
 }
 
-function ensureVideoConnection() {
-  if (controllerStopped) {
-    return;
-  }
-
-  if (!isWatchPage()) {
-    detachVideo();
-    reportEligibility(false);
-    setStatus({
-      isEligible: false,
-      isControlling: false,
-      currentRate: settings.normalSpeed,
-      mode: "inactive",
-      reason: "not_watch_page"
-    });
+function ensureVideoConnection({ restartPlayback = false } = {}) {
+  if (controllerStopped || currentWatchId === null || getWatchId(location.href) !== currentWatchId) {
     return;
   }
 
   reportEligibility(true);
   const nextVideo = document.querySelector("video.html5-main-video");
   if (!nextVideo) {
-    detachVideo({ resetRate: false });
-    setStatus({
-      isEligible: true,
-      isControlling: false,
-      currentRate: settings.normalSpeed,
-      mode: "inactive",
-      reason: "no_video"
-    });
+    detachVideo();
     return;
   }
 
-  attachVideo(nextVideo);
+  if (nextVideo !== monitoredVideo) {
+    attachVideo(nextVideo);
+  } else if (restartPlayback) {
+    updateInactiveState(getCurrentReason(nextVideo));
+    onPlaybackEvent();
+  }
   if (!settings.extensionEnabled) {
     updateInactiveState("disabled");
   }
@@ -673,24 +701,40 @@ function scheduleEnsureVideoConnection() {
   });
 }
 
-function watchUrlChanges() {
-  if (controllerStopped) {
+function updateLocation() {
+  const url = location.href;
+  if (controllerStopped || currentUrl === url) {
     return;
   }
 
-  if (urlTimer) {
-    clearInterval(urlTimer);
+  currentUrl = url;
+  const watchId = getWatchId(url);
+  if (watchId === currentWatchId) {
+    return;
   }
 
-  urlTimer = setInterval(() => {
-    if (location.href === currentUrl) {
-      return;
-    }
+  const wasWatching = currentWatchId !== null;
+  currentWatchId = watchId;
+  playbackGeneration += 1;
 
-    currentUrl = location.href;
+  if (watchId === null) {
+    stopWatchingVideo();
+    detachVideo();
+    reportEligibility(false);
+    return;
+  }
+
+  if (wasWatching) {
+    stopSampling();
     clearSilenceTracking();
-    scheduleEnsureVideoConnection();
-  }, 500);
+    resetPlaybackRate();
+  } else {
+    installInteractionListeners();
+    watchDomChanges();
+    startEnsuringVideo();
+  }
+
+  ensureVideoConnection({ restartPlayback: wasWatching });
 }
 
 function watchDomChanges() {
@@ -767,6 +811,7 @@ if (isRuntimeAvailable()) {
       if (!settings.extensionEnabled) {
         updateInactiveState("disabled");
       } else {
+        onPlaybackEvent();
         tick();
       }
     }
@@ -775,12 +820,13 @@ if (isRuntimeAvailable()) {
 
 async function initialize() {
   await loadSettings();
-  currentUrl = location.href;
-  installInteractionListeners();
-  ensureVideoConnection();
-  watchUrlChanges();
-  watchDomChanges();
-  startEnsuringVideo();
+  if (controllerStopped) {
+    return;
+  }
+
+  updateLocation();
+  window.navigation?.addEventListener("currententrychange", updateLocation);
+  urlTimer = setInterval(updateLocation, 500);
 }
 
 initialize().catch((error) => {

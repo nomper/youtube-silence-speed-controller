@@ -21,3 +21,4 @@ dist/
 
 # Node (future tooling)
 node_modules/
+/release/

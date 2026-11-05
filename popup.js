@@ -18,6 +18,7 @@ const extensionEnabledEl = document.getElementById("extension-enabled");
 const statusVisibleEl = document.getElementById("status-visible");
 const statusSectionsEl = document.getElementById("status-sections");
 const openOptionsButton = document.getElementById("open-options");
+const openSupportButton = document.getElementById("open-support");
 
 let refreshTimer = null;
 
@@ -115,6 +116,12 @@ async function updateSetting(key, value) {
 openOptionsButton.addEventListener("click", () => {
   chrome.runtime.openOptionsPage();
 });
+
+if (openSupportButton) {
+  openSupportButton.addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("support.html") });
+  });
+}
 
 extensionEnabledEl.addEventListener("change", async () => {
   await updateSetting("extensionEnabled", extensionEnabledEl.checked);

@@ -231,6 +231,17 @@ button {
   color: #4e442e;
 }
 
+.footer {
+  margin-top: 16px;
+  text-align: center;
+  color: #4b4e5d;
+}
+
+.footer a {
+  color: #9b5411;
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   .page {
     padding: 24px 16px 40px;
